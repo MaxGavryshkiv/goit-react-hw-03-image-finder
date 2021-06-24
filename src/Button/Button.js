@@ -1,4 +1,5 @@
 import React, { Component } from "react";
+import PropTypes from "prop-types";
 
 import "../styles/Button.scss";
 
@@ -9,7 +10,6 @@ class Button extends Component {
       behavior: "smooth",
     });
   }
-
   render() {
     return (
       <button type="button" onClick={this.props.onClick} className="Button">
@@ -18,5 +18,9 @@ class Button extends Component {
     );
   }
 }
+
+Button.propTypes = {
+  onClick: PropTypes.func.isRequired,
+};
 
 export default Button;

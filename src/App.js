@@ -1,6 +1,7 @@
 import React from "react";
-import Loader from "react-loader-spinner";
 
+import Modal from "./Modal";
+import Load from "./Loader";
 import pixabayApi from "./servises/pixabay-api";
 import ImageGallery from "./ImageGallery";
 import Searchbar from "./Searchbar";
@@ -8,7 +9,7 @@ import Button from "./Button";
 
 import "./App.scss";
 
-// TODO
+// TODO propTypes and defaultProps
 
 class App extends React.Component {
   state = {
@@ -17,10 +18,12 @@ class App extends React.Component {
     searchQuery: "",
     isLoading: false,
     error: null,
+    showModal: false,
   };
 
   componentDidUpdate(prevProps, prevState) {
-    if (prevState.searchQuery !== this.state.searchQuery) {
+    const { searchQuery } = this.state;
+    if (prevState.searchQuery !== searchQuery) {
       this.fetchHits();
     }
   }
@@ -30,6 +33,7 @@ class App extends React.Component {
       searchQuery: query,
       currentPage: 1,
       hits: [],
+      largeImageURL: "",
     });
   };
 
@@ -51,22 +55,44 @@ class App extends React.Component {
       .finally(() => this.setState({ isLoading: false }));
   };
 
+  openModal = (largeImg) => {
+    this.setState(({ showModal }) => ({
+      showModal: !showModal,
+    }));
+    this.setState(() => ({
+      largeImageURL: largeImg,
+    }));
+  };
+
+  closeModal = () => {
+    this.setState(({ showModal }) => ({
+      showModal: !showModal,
+    }));
+  };
   render() {
-    const { hits, isLoading } = this.state;
+    const { hits, isLoading, showModal, largeImageURL } = this.state;
     const shouldRenderLoadMoreButton = hits.length > 0 && !isLoading;
 
     return (
       <>
         <Searchbar onSubmit={this.onChangeQuery} />
-        <ImageGallery obj={hits} />
+        <ImageGallery
+          obj={hits}
+          onClickModal={this.openModal}
+          modalChild={this.modalChild}
+        />
 
         <div className="button-container">
-          {isLoading && (
-            <Loader type="Bars" color="#00BFFF" height={80} width={80} />
-          )}
+          {isLoading && <Load />}
 
           {shouldRenderLoadMoreButton && <Button onClick={this.fetchHits} />}
         </div>
+
+        {showModal && (
+          <Modal onClose={this.closeModal}>
+            <img src={largeImageURL} alt="" />
+          </Modal>
+        )}
       </>
     );
   }
